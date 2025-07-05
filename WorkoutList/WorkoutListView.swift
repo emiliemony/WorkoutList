@@ -19,20 +19,29 @@ struct ContentView: View {
     }()
 
     // State for workout titles
-    @State private var workoutTitles: [String] = ["Workout"]
+    @State private var workoutTitles: [String] = ["Emilie's Core Workout"]
     @State private var newWorkoutTitle: String = ""
     @State private var showingAdd: Bool = false
 
     var body: some View {
         NavigationStack {
             VStack {
-                // Centered Title
-                Text("Workouts")
-                    .font(.largeTitle)
-                    .bold()
-                    .foregroundColor(.white)
-                    .padding(.top, 20)
-                    .frame(maxWidth: .infinity, alignment: .center)
+                // Header (title + icon)
+                VStack(spacing: 12) {
+                    Text("Workouts")
+                        .font(.largeTitle)
+                        .bold()
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .center)
+
+                    Image("HeaderImage") // ensure your icon asset is named "AppIcon" or change accordingly
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 100)
+                        .cornerRadius(20)
+                }
+                .padding(.top, 20)
+                .background(Color("SecondaryBackground"))
 
                 // List of workouts
                 List {
@@ -65,7 +74,7 @@ struct ContentView: View {
                 }
             }
             .onAppear { loadWorkoutTitles() }
-            .background(Color("SecondaryBackground"))
+            .background(Color("PrimaryBackground"))
         }
     }
 
@@ -88,7 +97,7 @@ struct ContentView: View {
     private func loadWorkoutTitles() {
         guard let data = try? Data(contentsOf: fileURL),
               let decoded = try? JSONDecoder().decode([String].self, from: data) else {
-            workoutTitles = ["Workout"]
+            workoutTitles = ["Emilie's Core Workout"]
             return
         }
         workoutTitles = decoded
