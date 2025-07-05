@@ -21,32 +21,18 @@ struct ContentView: View {
     // State for workout titles
     @State private var workoutTitles: [String] = ["Workout"]
     @State private var newWorkoutTitle: String = ""
+    @State private var showingAdd: Bool = false
 
     var body: some View {
         NavigationStack {
             VStack {
-                // Add‑new‑workout field
-                HStack {
-                    TextField("New Workout Name", text: $newWorkoutTitle)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-
-                    Button(action: {
-                        let trimmed = newWorkoutTitle.trimmingCharacters(in: .whitespaces)
-                        if !trimmed.isEmpty && !workoutTitles.contains(trimmed) {
-                            workoutTitles.append(trimmed)
-                            newWorkoutTitle = ""
-                            saveWorkoutTitles()
-                        }
-                    }) {
-                        Image(systemName: "plus")
-                            .padding(6)
-                            .background(Color.blue.opacity(0.2))
-                            .cornerRadius(8)
-                    }
-                    .disabled(newWorkoutTitle.trimmingCharacters(in: .whitespaces).isEmpty)
-                }
-                .padding(.top)
+                // Centered Title
+                Text("Workouts")
+                    .font(.largeTitle)
+                    .bold()
+                    .foregroundColor(.white)
+                    .padding(.top, 20)
+                    .frame(maxWidth: .infinity, alignment: .center)
 
                 // List of workouts
                 List {
@@ -60,11 +46,35 @@ struct ContentView: View {
                         saveWorkoutTitles()
                     }
                 }
-                .navigationTitle("My Workouts")
-                .toolbar { EditButton() }
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: { showingAdd = true }) {
+                            Image(systemName: "plus")
+                        }
+                    }
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        EditButton()
+                    }
+                }
+                .alert("New Workout", isPresented: $showingAdd) {
+                    TextField("Workout name", text: $newWorkoutTitle)
+                    Button("Add") { addWorkout() }
+                    Button("Cancel", role: .cancel) { newWorkoutTitle = "" }
+                } message: {
+                    Text("Enter a name for your new workout list.")
+                }
             }
             .onAppear { loadWorkoutTitles() }
+            .background(Color("SecondaryBackground"))
         }
+    }
+
+    private func addWorkout() {
+        let trimmed = newWorkoutTitle.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty, !workoutTitles.contains(trimmed) else { return }
+        workoutTitles.append(trimmed)
+        newWorkoutTitle = ""
+        saveWorkoutTitles()
     }
 
     // Save titles to disk
