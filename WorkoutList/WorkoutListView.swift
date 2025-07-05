@@ -2,7 +2,6 @@ import SwiftUI
 import AVFoundation
 
 // MARK: - ListItem Model
-
 struct ListItem: Identifiable, Codable {
     var id = UUID()
     var firstInfo: String
@@ -11,14 +10,22 @@ struct ListItem: Identifiable, Codable {
 }
 
 // MARK: - Home View
-
 struct ContentView: View {
+    // File location for the list of workout titles
+    private let fileURL: URL = {
+        let manager = FileManager.default
+        let url = manager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        return url.appendingPathComponent("workoutTitles.json")
+    }()
+
+    // State for workout titles
     @State private var workoutTitles: [String] = ["Workout"]
     @State private var newWorkoutTitle: String = ""
 
     var body: some View {
         NavigationStack {
             VStack {
+                // Add‑new‑workout field
                 HStack {
                     TextField("New Workout Name", text: $newWorkoutTitle)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -29,6 +36,7 @@ struct ContentView: View {
                         if !trimmed.isEmpty && !workoutTitles.contains(trimmed) {
                             workoutTitles.append(trimmed)
                             newWorkoutTitle = ""
+                            saveWorkoutTitles()
                         }
                     }) {
                         Image(systemName: "plus")
@@ -40,6 +48,7 @@ struct ContentView: View {
                 }
                 .padding(.top)
 
+                // List of workouts
                 List {
                     ForEach(workoutTitles, id: \.self) { title in
                         NavigationLink(destination: WorkoutListView(workoutTitle: title)) {
@@ -48,29 +57,49 @@ struct ContentView: View {
                     }
                     .onDelete { offsets in
                         workoutTitles.remove(atOffsets: offsets)
+                        saveWorkoutTitles()
                     }
                 }
                 .navigationTitle("My Workouts")
-                .toolbar {
-                    EditButton()
-                }
+                .toolbar { EditButton() }
             }
+            .onAppear { loadWorkoutTitles() }
         }
+    }
+
+    // Save titles to disk
+    private func saveWorkoutTitles() {
+        if let data = try? JSONEncoder().encode(workoutTitles) {
+            try? data.write(to: fileURL)
+        }
+    }
+
+    // Load titles from disk
+    private func loadWorkoutTitles() {
+        guard let data = try? Data(contentsOf: fileURL),
+              let decoded = try? JSONDecoder().decode([String].self, from: data) else {
+            workoutTitles = ["Workout"]
+            return
+        }
+        workoutTitles = decoded
     }
 }
 
 // MARK: - WorkoutListView
-
 struct WorkoutListView: View {
     let workoutTitle: String
+
     @State private var items: [ListItem] = []
     @State private var firstInput: String = ""
     @State private var secondInput: String = ""
     @State private var isReps: Bool = true
+
+    // Timer state
     @State private var activeTimer: UUID? = nil
     @State private var remainingTime: Int = 0
     @State private var timer: Timer? = nil
 
+    // Each workout saves to its own JSON file
     private var fileURL: URL {
         let manager = FileManager.default
         let url = manager.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -86,14 +115,13 @@ struct WorkoutListView: View {
                 .padding(.top, 20)
                 .frame(maxWidth: .infinity, alignment: .center)
 
+            // Entry row
             HStack {
                 TextField("Exercise", text: $firstInput)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .frame(width: 140)
 
-                Button(action: {
-                    isReps.toggle()
-                }) {
+                Button(action: { isReps.toggle() }) {
                     Image(systemName: isReps ? "dumbbell" : "clock")
                         .padding(.horizontal)
                         .frame(height: 36)
@@ -113,6 +141,7 @@ struct WorkoutListView: View {
             }
             .padding()
 
+            // List of exercises
             List {
                 ForEach($items) { $item in
                     HStack(spacing: 12) {
@@ -123,14 +152,10 @@ struct WorkoutListView: View {
                         Spacer()
 
                         if item.unit == "Secs" {
-                            Button(action: {
-                                toggleTimer(for: item)
-                            }) {
+                            Button(action: { toggleTimer(for: item) }) {
                                 HStack(spacing: 2) {
                                     Image(systemName: "clock")
-                                    if activeTimer == item.id {
-                                        Text("\(remainingTime)s")
-                                    }
+                                    if activeTimer == item.id { Text("\(remainingTime)s") }
                                 }
                                 .foregroundColor(.blue)
                             }
@@ -157,16 +182,15 @@ struct WorkoutListView: View {
                     saveItems()
                 }
             }
-            .toolbar {
-                EditButton()
-            }
+            .toolbar { EditButton() }
             .scrollContentBackground(.hidden)
             .background(Color("PrimaryBackground"))
         }
         .background(Color("SecondaryBackground"))
-        .onAppear(perform: loadItems)
+        .onAppear { loadItems() }
     }
 
+    // Add exercise
     private func addItem() {
         items.append(ListItem(firstInfo: firstInput, secondInfo: secondInput, unit: isReps ? "Reps" : "Secs"))
         firstInput = ""
@@ -175,6 +199,7 @@ struct WorkoutListView: View {
         hideKeyboard()
     }
 
+    // Persistence helpers
     private func saveItems() {
         if let data = try? JSONEncoder().encode(items) {
             try? data.write(to: fileURL)
@@ -189,6 +214,7 @@ struct WorkoutListView: View {
         items = decoded
     }
 
+    // Timer logic
     private func toggleTimer(for item: ListItem) {
         if activeTimer == item.id {
             timer?.invalidate()
@@ -202,7 +228,7 @@ struct WorkoutListView: View {
                 if remainingTime > 0 {
                     remainingTime -= 1
                 } else {
-                    AudioServicesPlaySystemSound(1021)
+                    AudioServicesPlaySystemSound(1021) // chime
                     timer?.invalidate()
                     activeTimer = nil
                 }
@@ -211,7 +237,7 @@ struct WorkoutListView: View {
     }
 }
 
-// Keyboard dismiss helper
+// MARK: - Keyboard dismiss helper
 extension View {
     func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
