@@ -41,6 +41,7 @@ struct ContentView: View {
                         .cornerRadius(20)
                 }
                 .padding(.top, 20)
+                .padding(.bottom, 20)
                 .background(Color("SecondaryBackground"))
 
                 // List of workouts
@@ -55,6 +56,9 @@ struct ContentView: View {
                         saveWorkoutTitles()
                     }
                 }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .background(Color("PrimaryBackground"))
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: { showingAdd = true }) {
