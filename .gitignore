@@ -43,3 +43,4 @@ Carthage/
 
 # JSON data saved by the app (optional, if you don’t want to track saved items)
 # items.json
+*.json
