@@ -253,9 +253,8 @@ struct WorkoutListView: View {
             activeTimer = item.id
 
             timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-                if remainingTime > 0 {
-                    remainingTime -= 1
-                } else {
+                remainingTime -= 1
+                if remainingTime <= 0 {
                     AudioServicesPlaySystemSound(1021) // chime
                     timer?.invalidate()
                     activeTimer = nil
