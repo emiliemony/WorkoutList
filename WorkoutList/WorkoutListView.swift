@@ -211,7 +211,6 @@ struct WorkoutListView: View {
         }
         .background(Color("SecondaryBackground"))
         .onAppear { loadItems() }
-        .onTapGesture { hideKeyboard() }
     }
 
     // Add exercise
