@@ -2,7 +2,7 @@ import SwiftUI
 import AVFoundation
 
 // MARK: - ListItem Model
-struct ListItem: Identifiable, Codable {
+struct ListItem: Identifiable, Codable, Equatable {
     var id = UUID()
     var firstInfo: String
     var secondInfo: String
@@ -34,7 +34,7 @@ struct ContentView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .center)
 
-                    Image("HeaderImage") // ensure your icon asset is named "AppIcon" or change accordingly
+                    Image("HeaderImage")
                         .resizable()
                         .scaledToFit()
                         .frame(height: 100)
@@ -208,9 +208,14 @@ struct WorkoutListView: View {
             .toolbar { EditButton() }
             .scrollContentBackground(.hidden)
             .background(Color("PrimaryBackground"))
+            // Persist edits whenever items change (iOS17+)
+            .onChange(of: items) { _, _ in
+                saveItems()
+            }
         }
         .background(Color("SecondaryBackground"))
         .onAppear { loadItems() }
+        .onDisappear { saveItems() }
     }
 
     // Add exercise
