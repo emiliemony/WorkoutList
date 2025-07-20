@@ -11,8 +11,7 @@ struct ListItem: Identifiable, Codable, Equatable {
 
 // MARK: - Home View
 struct ContentView: View {
-    // File location for the list of workout titles
-    private let fileURL: URL = {
+    private let titlesURL: URL = {
         let manager = FileManager.default
         let url = manager.urls(for: .documentDirectory, in: .userDomainMask).first!
         return url.appendingPathComponent("workoutTitles.json")
@@ -25,24 +24,18 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                // Header (title + icon)
+                // Header
                 VStack(spacing: 12) {
                     Text("Workouts")
-                        .font(.largeTitle)
-                        .bold()
-                        .foregroundColor(.white)
+                        .font(.largeTitle).bold().foregroundColor(.white)
                         .frame(maxWidth: .infinity)
-
                     Image("HeaderImage")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 100)
-                        .cornerRadius(20)
+                        .resizable().scaledToFit().frame(height: 100).cornerRadius(20)
                 }
                 .padding(.vertical, 20)
                 .background(Color("SecondaryBackground"))
 
-                // List of workouts
+                // Workout list
                 List {
                     ForEach(workoutTitles, id: \.self) { title in
                         NavigationLink(destination: WorkoutListView(workoutTitle: title)) {
@@ -51,51 +44,46 @@ struct ContentView: View {
                     }
                     .onDelete { offsets in
                         workoutTitles.remove(atOffsets: offsets)
-                        saveWorkoutTitles()
+                        saveTitles()
                     }
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
+                .listStyle(.plain).scrollContentBackground(.hidden)
                 .background(Color("PrimaryBackground"))
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: { showingAdd = true }) {
-                            Image(systemName: "plus")
-                        }
-                    }
-                    ToolbarItem(placement: .navigationBarLeading) {
                         EditButton()
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button { showingAdd = true } label: { Image(systemName: "plus") }
                     }
                 }
                 .alert("New Workout", isPresented: $showingAdd) {
                     TextField("Workout name", text: $newWorkoutTitle)
-                    Button("Add") { addWorkout() }
+                    Button("Add", action: addTitle)
                     Button("Cancel", role: .cancel) { newWorkoutTitle = "" }
-                } message: {
-                    Text("Enter a name for your new workout list.")
-                }
+                } message: { Text("Enter a name for your new workout list.") }
             }
-            .onAppear { loadWorkoutTitles() }
+            .onAppear(perform: loadTitles)
             .background(Color("PrimaryBackground"))
         }
     }
 
-    private func addWorkout() {
+    private func addTitle() {
         let trimmed = newWorkoutTitle.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty, !workoutTitles.contains(trimmed) else { return }
         workoutTitles.append(trimmed)
         newWorkoutTitle = ""
-        saveWorkoutTitles()
+        saveTitles()
     }
 
-    private func saveWorkoutTitles() {
+    private func saveTitles() {
         if let data = try? JSONEncoder().encode(workoutTitles) {
-            try? data.write(to: fileURL)
+            try? data.write(to: titlesURL)
         }
     }
 
-    private func loadWorkoutTitles() {
-        if let data = try? Data(contentsOf: fileURL),
+    private func loadTitles() {
+        if let data = try? Data(contentsOf: titlesURL),
            let decoded = try? JSONDecoder().decode([String].self, from: data) {
             workoutTitles = decoded
         } else {
@@ -116,140 +104,125 @@ struct WorkoutListView: View {
     @State private var activeTimer: UUID? = nil
     @State private var remainingTime: Int = 0
     @State private var timer: Timer? = nil
+    @Environment(\.editMode) private var editMode
+
+    private var localURL: URL {
+        let manager = FileManager.default
+        return manager.urls(for: .documentDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("\(workoutTitle).json")
+    }
 
     var body: some View {
         VStack {
-            Text(workoutTitle)
-                .font(.largeTitle)
-                .bold()
-                .foregroundColor(.white)
-                .padding(.top, 20)
-                .frame(maxWidth: .infinity)
+            HStack {
+                Text(workoutTitle)
+                    .font(.largeTitle).bold().foregroundColor(.white)
+                Spacer()
+                if editMode?.wrappedValue.isEditing == true {
+                    Button("Reset") { resetToDefault() }
+                }
+            }
+            .padding().background(Color("SecondaryBackground"))
 
-            // Entry row
             HStack {
                 TextField("Exercise", text: $firstInput)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(width: 140)
-
-                Button(action: { isReps.toggle() }) {
+                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(width: 140)
+                Button { isReps.toggle() } label: {
                     Image(systemName: isReps ? "dumbbell" : "clock")
-                        .padding(.horizontal)
-                        .frame(height: 36)
-                        .foregroundColor(.blue)
-                        .background(Color.blue.opacity(0.2))
-                        .cornerRadius(8)
+                        .padding(.horizontal).frame(height: 36)
+                        .background(Color.blue.opacity(0.2)).cornerRadius(8)
                 }
-
                 TextField(isReps ? "Reps" : "Secs", text: $secondInput)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(width: 60)
-
-                Button(action: addItem) {
-                    Image(systemName: "plus")
-                }
-                .disabled(firstInput.isEmpty || secondInput.isEmpty)
+                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(width: 60)
+                Button { addItem() } label: { Image(systemName: "plus") }
+                    .disabled(firstInput.isEmpty || secondInput.isEmpty)
             }
             .padding()
 
-            // List of exercises
             List {
                 ForEach($items) { $item in
                     HStack(spacing: 12) {
                         TextField("Exercise", text: $item.firstInfo)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .frame(width: 140)
-
+                            .textFieldStyle(RoundedBorderTextFieldStyle()).frame(width: 140)
                         Spacer()
-
                         if item.unit == "Secs" {
-                            Button(action: { toggleTimer(for: item) }) {
-                                HStack(spacing: 2) {
-                                    Image(systemName: "clock")
-                                    if activeTimer == item.id { Text("\(remainingTime)s") }
-                                }
+                            Button { toggleTimer(for: item) } label: {
+                                HStack { Image(systemName: "clock")
+                                if activeTimer == item.id { Text("\(remainingTime)s") }}
                             }
-                            .foregroundColor(.blue)
                         } else {
                             Image(systemName: "dumbbell")
-                                .foregroundColor(.blue)
                         }
-
                         Spacer()
-
                         TextField("Value", text: $item.secondInfo)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .frame(width: 60)
+                            .textFieldStyle(RoundedBorderTextFieldStyle()).frame(width: 60)
                     }
                     .padding(.vertical, 4)
                     .listRowBackground(Color("SecondaryBackground"))
                 }
-                .onDelete { offsets in
-                    items.remove(atOffsets: offsets)
-                    saveItems()
-                }
-                .onMove { source, destination in
-                    items.move(fromOffsets: source, toOffset: destination)
-                    saveItems()
-                }
+                .onDelete { offsets in items.remove(atOffsets: offsets); saveItems() }
+                .onMove { src, dst in items.move(fromOffsets: src, toOffset: dst); saveItems() }
             }
-            .toolbar { EditButton() }
-            .scrollContentBackground(.hidden)
-            .background(Color("PrimaryBackground"))
-            .onChange(of: items) { _, _ in saveItems() }
+            .toolbar { ToolbarItem(placement: .navigationBarTrailing) { EditButton() } }
+            .scrollContentBackground(.hidden).background(Color("PrimaryBackground"))
+            .onAppear(perform: loadItems)
+            .onDisappear(perform: saveItems)
         }
-        .background(Color("SecondaryBackground"))
-        .onAppear { loadItems() }
-        .onDisappear { saveItems() }
     }
 
     private func addItem() {
         items.append(ListItem(firstInfo: firstInput, secondInfo: secondInput, unit: isReps ? "Reps" : "Secs"))
-        firstInput = ""
-        secondInput = ""
-        saveItems()
-        hideKeyboard()
+        firstInput = ""; secondInput = ""; saveItems(); hideKeyboard()
+    }
+
+    private func loadItems() {
+        let fm = FileManager.default
+        if fm.fileExists(atPath: localURL.path),
+           let data = try? Data(contentsOf: localURL),
+           let decoded = try? JSONDecoder().decode([ListItem].self, from: data) {
+            items = decoded
+        } else if let bundleURL = Bundle.main.url(forResource: workoutTitle, withExtension: "json"),
+                  let data = try? Data(contentsOf: bundleURL),
+                  let decoded = try? JSONDecoder().decode([ListItem].self, from: data) {
+            items = decoded
+            // save default locally
+            if let saveData = try? JSONEncoder().encode(decoded) {
+                try? saveData.write(to: localURL)
+            }
+        } else {
+            items = []
+        }
     }
 
     private func saveItems() {
         if let data = try? JSONEncoder().encode(items) {
-            // No local writes here
+            try? data.write(to: localURL)
         }
     }
 
-    private func loadItems() {
-        // Always load default workout from bundle
+    private func resetToDefault() {
         if let bundleURL = Bundle.main.url(forResource: workoutTitle, withExtension: "json"),
-           let bundleData = try? Data(contentsOf: bundleURL),
-           let decoded = try? JSONDecoder().decode([ListItem].self, from: bundleData) {
+           let data = try? Data(contentsOf: bundleURL),
+           let decoded = try? JSONDecoder().decode([ListItem].self, from: data) {
             items = decoded
+            if let saveData = try? JSONEncoder().encode(decoded) {
+                try? saveData.write(to: localURL)
+            }
         }
     }
 
     private func toggleTimer(for item: ListItem) {
-        if activeTimer == item.id {
-            timer?.invalidate()
-            activeTimer = nil
-        } else {
-            timer?.invalidate()
-            remainingTime = Int(item.secondInfo) ?? 0
-            activeTimer = item.id
-
+        if activeTimer == item.id { timer?.invalidate(); activeTimer = nil }
+        else {
+            timer?.invalidate(); remainingTime = Int(item.secondInfo) ?? 0; activeTimer = item.id
             timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
                 remainingTime -= 1
-                if remainingTime <= 0 {
-                    AudioServicesPlaySystemSound(1021)
-                    timer?.invalidate()
-                    activeTimer = nil
-                }
+                if remainingTime <= 0 { AudioServicesPlaySystemSound(1021); timer?.invalidate(); activeTimer = nil }
             }
         }
     }
 }
 
-// MARK: - Keyboard dismiss helper
-extension View {
-    func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
-}
+extension View { func hideKeyboard() {
+    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+}}
