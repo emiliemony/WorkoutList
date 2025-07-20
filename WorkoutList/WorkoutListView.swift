@@ -18,7 +18,6 @@ struct ContentView: View {
         return url.appendingPathComponent("workoutTitles.json")
     }()
 
-    // State for workout titles
     @State private var workoutTitles: [String] = ["Emilie's Core Workout"]
     @State private var newWorkoutTitle: String = ""
     @State private var showingAdd: Bool = false
@@ -32,7 +31,7 @@ struct ContentView: View {
                         .font(.largeTitle)
                         .bold()
                         .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, alignment: .center)
+                        .frame(maxWidth: .infinity)
 
                     Image("HeaderImage")
                         .resizable()
@@ -40,8 +39,7 @@ struct ContentView: View {
                         .frame(height: 100)
                         .cornerRadius(20)
                 }
-                .padding(.top, 20)
-                .padding(.bottom, 20)
+                .padding(.vertical, 20)
                 .background(Color("SecondaryBackground"))
 
                 // List of workouts
@@ -90,21 +88,19 @@ struct ContentView: View {
         saveWorkoutTitles()
     }
 
-    // Save titles to disk
     private func saveWorkoutTitles() {
         if let data = try? JSONEncoder().encode(workoutTitles) {
             try? data.write(to: fileURL)
         }
     }
 
-    // Load titles from disk
     private func loadWorkoutTitles() {
-        guard let data = try? Data(contentsOf: fileURL),
-              let decoded = try? JSONDecoder().decode([String].self, from: data) else {
+        if let data = try? Data(contentsOf: fileURL),
+           let decoded = try? JSONDecoder().decode([String].self, from: data) {
+            workoutTitles = decoded
+        } else {
             workoutTitles = ["Emilie's Core Workout"]
-            return
         }
-        workoutTitles = decoded
     }
 }
 
@@ -117,17 +113,9 @@ struct WorkoutListView: View {
     @State private var secondInput: String = ""
     @State private var isReps: Bool = true
 
-    // Timer state
     @State private var activeTimer: UUID? = nil
     @State private var remainingTime: Int = 0
     @State private var timer: Timer? = nil
-
-    // Each workout saves to its own JSON file
-    private var fileURL: URL {
-        let manager = FileManager.default
-        let url = manager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        return url.appendingPathComponent("\(workoutTitle).json")
-    }
 
     var body: some View {
         VStack {
@@ -136,7 +124,7 @@ struct WorkoutListView: View {
                 .bold()
                 .foregroundColor(.white)
                 .padding(.top, 20)
-                .frame(maxWidth: .infinity, alignment: .center)
+                .frame(maxWidth: .infinity)
 
             // Entry row
             HStack {
@@ -180,8 +168,8 @@ struct WorkoutListView: View {
                                     Image(systemName: "clock")
                                     if activeTimer == item.id { Text("\(remainingTime)s") }
                                 }
-                                .foregroundColor(.blue)
                             }
+                            .foregroundColor(.blue)
                         } else {
                             Image(systemName: "dumbbell")
                                 .foregroundColor(.blue)
@@ -194,7 +182,7 @@ struct WorkoutListView: View {
                             .frame(width: 60)
                     }
                     .padding(.vertical, 4)
-                    .listRowBackground(Color("SecondaryBackground"))
+                    .listRowBackground(Color("PrimaryBackground"))
                 }
                 .onDelete { offsets in
                     items.remove(atOffsets: offsets)
@@ -208,17 +196,13 @@ struct WorkoutListView: View {
             .toolbar { EditButton() }
             .scrollContentBackground(.hidden)
             .background(Color("PrimaryBackground"))
-            // Persist edits whenever items change (iOS17+)
-            .onChange(of: items) { _, _ in
-                saveItems()
-            }
+            .onChange(of: items) { _, _ in saveItems() }
         }
         .background(Color("SecondaryBackground"))
         .onAppear { loadItems() }
         .onDisappear { saveItems() }
     }
 
-    // Add exercise
     private func addItem() {
         items.append(ListItem(firstInfo: firstInput, secondInfo: secondInput, unit: isReps ? "Reps" : "Secs"))
         firstInput = ""
@@ -227,22 +211,21 @@ struct WorkoutListView: View {
         hideKeyboard()
     }
 
-    // Persistence helpers
     private func saveItems() {
         if let data = try? JSONEncoder().encode(items) {
-            try? data.write(to: fileURL)
+            // No local writes here
         }
     }
 
     private func loadItems() {
-        guard let data = try? Data(contentsOf: fileURL),
-              let decoded = try? JSONDecoder().decode([ListItem].self, from: data) else {
-            return
+        // Always load default workout from bundle
+        if let bundleURL = Bundle.main.url(forResource: workoutTitle, withExtension: "json"),
+           let bundleData = try? Data(contentsOf: bundleURL),
+           let decoded = try? JSONDecoder().decode([ListItem].self, from: bundleData) {
+            items = decoded
         }
-        items = decoded
     }
 
-    // Timer logic
     private func toggleTimer(for item: ListItem) {
         if activeTimer == item.id {
             timer?.invalidate()
@@ -255,7 +238,7 @@ struct WorkoutListView: View {
             timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
                 remainingTime -= 1
                 if remainingTime <= 0 {
-                    AudioServicesPlaySystemSound(1021) // chime
+                    AudioServicesPlaySystemSound(1021)
                     timer?.invalidate()
                     activeTimer = nil
                 }
