@@ -40,7 +40,3 @@ Carthage/
 
 # Output and logs
 *.log
-
-# JSON data saved by the app (optional, if you don’t want to track saved items)
-# items.json
-*.json
