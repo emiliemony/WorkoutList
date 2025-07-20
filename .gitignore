@@ -1,42 +1,6 @@
-# Xcode project files
-DerivedData/
-build/
-*.xcworkspace
-xcuserdata/
+*.xcworkspace/
+*.xcworkspace/**
+*.xcodeproj/**/xcuserdata/
 *.xcuserstate
-*.moved-aside
 
-# SwiftPM
-.swiftpm/
-Package.resolved
-
-# CocoaPods (if ever used)
-Pods/
-Podfile.lock
-
-# Carthage (if used)
-Carthage/
-
-# Xcode previews cache
-**/.documentVersions/
-**/.appledoc/
-
-# macOS-specific system files
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Symbolic links to device builds (harmless but noisy)
-*.ipa
-*.dSYM.zip
-*.dSYM
-
-# User-specific settings
-*.orig
-*.swp
-*.swo
-.idea/
-*.xcodeproj/project.xcworkspace/xcuserdata/
-
-# Output and logs
-*.log
+.gitignore_bk
