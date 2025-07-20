@@ -17,7 +17,7 @@ struct ContentView: View {
         return url.appendingPathComponent("workoutTitles.json")
     }()
 
-    @State private var workoutTitles: [String] = ["Emilie's Core Workout"]
+    @State private var workoutTitles: [String] = ["Emilie's Workout"]
     @State private var newWorkoutTitle: String = ""
     @State private var showingAdd: Bool = false
 
@@ -87,7 +87,7 @@ struct ContentView: View {
            let decoded = try? JSONDecoder().decode([String].self, from: data) {
             workoutTitles = decoded
         } else {
-            workoutTitles = ["Emilie's Core Workout"]
+            workoutTitles = ["Emilie's Workout"]
         }
     }
 }
