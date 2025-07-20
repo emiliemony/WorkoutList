@@ -152,6 +152,7 @@ struct WorkoutListView: View {
                             }
                         } else {
                             Image(systemName: "dumbbell")
+                                .foregroundColor(.blue)
                         }
                         Spacer()
                         TextField("Value", text: $item.secondInfo)
