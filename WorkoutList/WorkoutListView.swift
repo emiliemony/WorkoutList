@@ -182,7 +182,7 @@ struct WorkoutListView: View {
                             .frame(width: 60)
                     }
                     .padding(.vertical, 4)
-                    .listRowBackground(Color("PrimaryBackground"))
+                    .listRowBackground(Color("SecondaryBackground"))
                 }
                 .onDelete { offsets in
                     items.remove(atOffsets: offsets)
