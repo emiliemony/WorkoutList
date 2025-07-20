@@ -118,9 +118,6 @@ struct WorkoutListView: View {
                 Text(workoutTitle)
                     .font(.largeTitle).bold().foregroundColor(.white)
                 Spacer()
-                if editMode?.wrappedValue.isEditing == true {
-                    Button("Reset") { resetToDefault() }
-                }
             }
             .padding().background(Color("SecondaryBackground"))
 
@@ -167,7 +164,12 @@ struct WorkoutListView: View {
             .toolbar { ToolbarItem(placement: .navigationBarTrailing) { EditButton() } }
             .scrollContentBackground(.hidden).background(Color("PrimaryBackground"))
             .onAppear(perform: loadItems)
-            .onDisappear(perform: saveItems)
+
+            if editMode?.wrappedValue.isEditing == true {
+                Button("Reset", action: resetToDefault)
+                    .foregroundColor(.blue)
+                    .padding()
+            }
         }
     }
 
