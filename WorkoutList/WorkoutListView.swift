@@ -154,7 +154,7 @@ struct WorkoutListView: View {
                                 HStack {
                                     Image(systemName: "clock")
                                     if activeTimer == item.id {
-                                        Text("\(remainingTime)s")
+                                        Text("\(remainingTime)")
                                     }
                                 }
                             }
