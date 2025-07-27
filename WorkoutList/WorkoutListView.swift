@@ -140,24 +140,43 @@ struct WorkoutListView: View {
                 ForEach($items) { $item in
                     HStack(spacing: 12) {
                         TextField("Exercise", text: $item.firstInfo)
-                            .textFieldStyle(RoundedBorderTextFieldStyle()).frame(width: 140)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .frame(width: 140)
+                            .onChange(of: item.firstInfo) {
+                                saveItems()
+                            }
+
                         Spacer()
+
                         if item.unit == "Secs" {
-                            Button { toggleTimer(for: item) } label: {
-                                HStack { Image(systemName: "clock")
-                                if activeTimer == item.id { Text("\(remainingTime)s") }}
+                            Button {
+                                toggleTimer(for: item)
+                            } label: {
+                                HStack {
+                                    Image(systemName: "clock")
+                                    if activeTimer == item.id {
+                                        Text("\(remainingTime)s")
+                                    }
+                                }
                             }
                         } else {
                             Image(systemName: "dumbbell")
                                 .foregroundColor(.blue)
                         }
+
                         Spacer()
+
                         TextField("Value", text: $item.secondInfo)
-                            .textFieldStyle(RoundedBorderTextFieldStyle()).frame(width: 60)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .frame(width: 60)
+                            .onChange(of: item.secondInfo) {
+                                saveItems()
+                            }
                     }
                     .padding(.vertical, 4)
                     .listRowBackground(Color("SecondaryBackground"))
                 }
+
                 .onDelete { offsets in items.remove(atOffsets: offsets); saveItems() }
                 .onMove { src, dst in items.move(fromOffsets: src, toOffset: dst); saveItems() }
             }
