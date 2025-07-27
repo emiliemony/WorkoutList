@@ -114,12 +114,11 @@ struct WorkoutListView: View {
 
     var body: some View {
         VStack {
-            HStack {
-                Text(workoutTitle)
-                    .font(.largeTitle).bold().foregroundColor(.white)
-                Spacer()
-            }
-            .padding().background(Color("SecondaryBackground"))
+            Text(workoutTitle)
+                .font(.largeTitle).bold().foregroundColor(.white)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding()
+                .background(Color("SecondaryBackground"))
 
             HStack {
                 TextField("Exercise", text: $firstInput)
