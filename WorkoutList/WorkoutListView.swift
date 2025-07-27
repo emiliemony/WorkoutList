@@ -155,6 +155,7 @@ struct WorkoutListView: View {
                                     Image(systemName: "clock")
                                     if activeTimer == item.id {
                                         Text("\(remainingTime)")
+                                            .foregroundColor(Color("SalmonBackground"))
                                     }
                                 }
                             }
