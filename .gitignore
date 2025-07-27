@@ -3,4 +3,7 @@
 *.xcodeproj/**/xcuserdata/
 *.xcuserstate
 
+.DS_Store
+WorkoutList/.DS_Store
+
 .gitignore_bk
