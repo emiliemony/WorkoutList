@@ -124,7 +124,7 @@ struct WorkoutListView: View {
 
             HStack {
                 TextField("Exercise", text: $firstInput)
-                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(width: 170)
+                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(width: 150)
                 Button { isReps.toggle() } label: {
                     Image(systemName: isReps ? "dumbbell" : "clock")
                         .padding(.horizontal).frame(height: 36)
@@ -142,7 +142,7 @@ struct WorkoutListView: View {
                     HStack(spacing: 12) {
                         TextField("Exercise", text: $item.exerciseName)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .frame(width: 170)
+                            .frame(width: 150)
                             .onChange(of: item.exerciseName) {
                                 saveItems()
                             }
@@ -153,15 +153,16 @@ struct WorkoutListView: View {
                             Button {
                                 toggleTimer(for: item)
                             } label: {
-                                HStack {
+                                if activeTimer == item.id {
+                                    Text("\(remainingTime)")
+                                        .foregroundColor(Color("SalmonBackground"))
+                                        .bold()
+                                } else {
                                     Image(systemName: "clock")
-                                    if activeTimer == item.id {
-                                        Text("\(remainingTime)")
-                                            .foregroundColor(Color("SalmonBackground"))
-                                    }
                                 }
                             }
-                        } else {
+                        }
+                        else {
                             Image(systemName: "dumbbell")
                                 .foregroundColor(.blue)
                         }
