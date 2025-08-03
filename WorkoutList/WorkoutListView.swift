@@ -4,8 +4,8 @@ import AVFoundation
 // MARK: - ListItem Model
 struct ListItem: Identifiable, Codable, Equatable {
     var id = UUID()
-    var firstInfo: String
-    var secondInfo: String
+    var exerciseName: String
+    var qtty: String
     var unit: String
 }
 
@@ -140,10 +140,10 @@ struct WorkoutListView: View {
             List {
                 ForEach($items) { $item in
                     HStack(spacing: 12) {
-                        TextField("Exercise", text: $item.firstInfo)
+                        TextField("Exercise", text: $item.exerciseName)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .frame(width: 170)
-                            .onChange(of: item.firstInfo) {
+                            .onChange(of: item.exerciseName) {
                                 saveItems()
                             }
 
@@ -168,10 +168,10 @@ struct WorkoutListView: View {
 
                         Spacer()
 
-                        TextField("Value", text: $item.secondInfo)
+                        TextField("Value", text: $item.qtty)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .frame(width: 60)
-                            .onChange(of: item.secondInfo) {
+                            .onChange(of: item.qtty) {
                                 saveItems()
                             }
                     }
@@ -195,7 +195,7 @@ struct WorkoutListView: View {
     }
 
     private func addItem() {
-        items.append(ListItem(firstInfo: firstInput, secondInfo: secondInput, unit: isReps ? "Reps" : "Secs"))
+        items.append(ListItem(exerciseName: firstInput, qtty: secondInput, unit: isReps ? "Reps" : "Secs"))
         firstInput = ""; secondInput = ""; saveItems(); hideKeyboard()
     }
 
@@ -238,7 +238,7 @@ struct WorkoutListView: View {
     private func toggleTimer(for item: ListItem) {
         if activeTimer == item.id { timer?.invalidate(); activeTimer = nil }
         else {
-            timer?.invalidate(); remainingTime = Int(item.secondInfo) ?? 0; activeTimer = item.id
+            timer?.invalidate(); remainingTime = Int(item.qtty) ?? 0; activeTimer = item.id
             timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
                 remainingTime -= 1
                 if remainingTime <= 0 { AudioServicesPlaySystemSound(1021); timer?.invalidate(); activeTimer = nil }
