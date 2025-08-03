@@ -124,7 +124,7 @@ struct WorkoutListView: View {
 
             HStack {
                 TextField("Exercise", text: $firstInput)
-                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(width: 150)
+                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(width: 160)
                 Button { isReps.toggle() } label: {
                     Image(systemName: isReps ? "dumbbell" : "clock")
                         .padding(.horizontal).frame(height: 36)
@@ -142,7 +142,7 @@ struct WorkoutListView: View {
                     HStack(spacing: 12) {
                         TextField("Exercise", text: $item.exerciseName)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .frame(width: 150)
+                            .frame(width: 160)
                             .onChange(of: item.exerciseName) {
                                 saveItems()
                             }
@@ -171,7 +171,7 @@ struct WorkoutListView: View {
 
                         TextField("Value", text: $item.qtty)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .frame(width: 60)
+                            .frame(width: 40)
                             .onChange(of: item.qtty) {
                                 saveItems()
                             }
