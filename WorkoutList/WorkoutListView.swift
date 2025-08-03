@@ -10,6 +10,8 @@ struct ListItem: Identifiable, Codable, Equatable {
 }
 
 // MARK: - Home View
+let defaultWorkoutTitle = "Emilie's Workout"
+
 struct ContentView: View {
     private let titlesURL: URL = {
         let manager = FileManager.default
@@ -17,7 +19,7 @@ struct ContentView: View {
         return url.appendingPathComponent("workoutTitles.json")
     }()
 
-    @State private var workoutTitles: [String] = ["Emilie's Workout"]
+    @State private var workoutTitles: [String] = [defaultWorkoutTitle]
     @State private var newWorkoutTitle: String = ""
     @State private var showingAdd: Bool = false
 
@@ -87,7 +89,7 @@ struct ContentView: View {
            let decoded = try? JSONDecoder().decode([String].self, from: data) {
             workoutTitles = decoded
         } else {
-            workoutTitles = ["Emilie's Workout"]
+            workoutTitles = [defaultWorkoutTitle]
         }
     }
 }
