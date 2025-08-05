@@ -1,6 +1,6 @@
 # WorkoutList
 
-**WorkoutList** is a lightweight iOS app that lets you create multiple custom workout lists, each with editable exercises, rep/time tracking, and a simple countdown timer for time-based sets.
+**WorkoutList** is an iOS app that lets you create workout lists, each with editable exercises and rep/time tracking.
 
 | Feature | Details |
 |---------|---------|
@@ -14,8 +14,6 @@
 | Requirement            | Version |
 |------------------------|---------|
 | Xcode                  | 15 or newer |
-| iOS Deployment Target  | 16.0+ |
-| Swift                  | 5.9 |
 
 ## Getting Started
 
@@ -29,5 +27,5 @@
 4. Install on a physical iPhone
    - Connect your iPhone to your computer via a cable
    - In the device selector, choose your iPhone
-   - Press ⌘ R
+   - Click the build button
    - iOS will ask if you trust the developer certificate
