@@ -50,7 +50,10 @@ struct ContentView: View {
                     }
                 }
                 .listStyle(.plain).scrollContentBackground(.hidden)
-                .background(Color("PrimaryBackground"))
+                .background(Image("backgroundImage")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea())
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         EditButton()
