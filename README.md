@@ -11,8 +11,8 @@
 
 ## Requirements
 
-iPhone
-Xcode (v15+)
+- iPhone
+- Xcode (v15+)
 
 ## Getting Started
 
