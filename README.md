@@ -11,20 +11,23 @@
 
 ## Requirements
 
+iPhone
 Xcode (v15+)
 
 ## Getting Started
 
 1. Clone the repo
 2. Open WorkoutList.xcodeproj in Xcode
-3. Run on the iOS Simulator
-   - In Xcode’s device selector (top bar), choose a simulator
-4. Install on a physical iPhone
-   - Connect your iPhone to your computer via a cable
-   - In the device selector, choose your iPhone
-   - Click the build button
-   - iOS will ask if you trust the developer certificate
+3. Build the app
+    3.1 Run on the iOS Simulator
+    - In Xcode’s device selector (top bar), choose a simulator
+    - Click the build button
+    3.2 Install on a physical iPhone
+    - Connect your iPhone to your computer via a cable
+    - In the device selector, choose your iPhone
+    - Click the build button
+    - iOS will ask if you trust the developer certificate
 
 ## FYI
 
-The app will only work on your iPhone for 7 days before you have to trust the developer certificate again. Changes you make to the workouts will be saved.
+The app will only work on your iPhone for 7 days before you have to rebuild the app from Xcode. Changes you make to the workouts will be saved.
