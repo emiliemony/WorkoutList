@@ -23,10 +23,12 @@
    - In Xcode’s device selector (top bar), choose a simulator
    - Click the build button
 5. Install on a physical iPhone
+   - Turn Developper Mode ON (make sure you're ok with the risks before doing so)
    - Connect your iPhone to your computer via a cable
    - In the device selector, choose your iPhone
    - Click the build button
    - iOS will ask if you trust the developer certificate
+   - You may get an error regarding the iOS version. This can be configured in Build Settings --> iOS Deployment Target.
 
 ## FYI
 
